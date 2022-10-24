@@ -1,0 +1,27 @@
+*** Les_3_Аннотация @Service ***
+
+1. Добавим пакет Service.
+Создадим в этом пакете интерфейс EmployeeService и клас EmployeeServiceImpl который его имплементирует.
+Для того чтобы пометить класс как Service мы должны над нашим классом EmployeeServiceImpl использовать
+аннотацию @Service.
+В методе getAllEmployees класса EmployeeServiceImpl мы просто будем вызывать метод нашего DAO класса
+EmployeeDAOImpl, который называется так же getAllEmployees. Это логично, потому что нет необходимости
+называть эти методы по-разному. Для того чтобы этот метод вызвать, пропишем зависимость от DAO -
+- @Autowired
+  private EmployeeDAO employeeDAO;
+
+Далее исправим зависимость в классе MyController, так как теперь наш MyController должен зависеть
+не от DAO - EmployeeDAO напрямую, а от EmployeeService.
+Так же используя best practice уберем аннотацию @Transactional из EmployeeDAOImpl и помещаем
+её в EmployeeServiceImpl. Т.е. транзакционность уже будет соблюдаться на уровне Сервиса, поэтому
+нам не имеет смысла писать её в методах репозитория.
+
+
+
+
+
+
+
+
+
+

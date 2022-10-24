@@ -1,0 +1,87 @@
+Настройка проекта:
+
+1. Добавление БД с помощью MySQL workbench
+2. Добавление Tomcat сервера.(через Run - Edit Configurations)
+3. Настройка pom.xml, добавление зависимостей spring-webmvc (при этом можно не добавлять зависимости
+spring-beans, spring-context, spring-core, spring-aop), так как они подгрузятся автоматически из spring-webmvc.
+Добавим зависимость - jstl.
+Добавим зависимость - hibernate-core.
+Добавим зависимость - mysql-connector-java.
+Добавим зависимость - c3p0 (читается как си цифра 3 пи ноль 0). (более подробно при настройке application context)
+Добавим зависимость - spring-orm. (orm - object relation mapping. С помощью ORM мы можем отображать Java объекты
+в базе данных в виде строк таблиц и наоборот из сток таблиц получить объект Java). Spring-orm так же содержит
+дополнительные классы, которые позволяют нам использовать Hibernate.
+
+4. index.jsp - hello world, который идёт с архитипом maven webapp мы удаляем.
+5. в main создадим директорию - java и пометим её как Mark Directory as Source root.
+6. в директории java создадим package - spring_mvc_hibernate_aop.
+8. в директории WEB-INF создадим директорию - view.
+9. настроим конфигурацию web.xml(прилагается файл web.txt - его содержимое копируем и заменяем им содержимое web.xml).
+
+10. настроим applicationContext.xml(прилагается файл applicationContext.txt - его содержимое копируем и заменяем
+им содержимое applicationContext.xml).
+
+    В этом разделе прописываются параметры для подключения к БД MySQL.
+    Ранее в Hibernate мы использовали для этого раздел session factory.
+    Здесь задействован c3p0.
+    Hibernate будет использовать Connection pool - общий котёл, для связи с базой данных.
+    Здесь мы прописываем бин с id="dataSource" и используем уже готовый
+    класс - class="com.mchange.v2.c3p0.ComboPooledDataSource" из библиотеки c3p0.
+    Далее прописывается информация для подключения к конкретной базе данных.
+    Таким образом c3p0 - это Connection pool.
+    По умолчанию чтобы соединиться с БД Hibernate использует JDBC подключение. Создание JDBC
+    подключений это очень времезатратная операция. Поэтому рекомендуют использовать Connection pool.
+    c3p0 Connection pool хранит подключения активными определенное время и закрывает их когда они
+    становятся ненужными. c3p0 позволяет нам экономить время на подключении к базе данных, а так же
+    он очень прост и удобен в использовании.
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+          destroy-method="close">
+        <property name="driverClass" value="com.mysql.cj.jdbc.Driver" />
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/my_db?useSSL=false&amp;serverTimezone=UTC" />
+        <property name="user" value="bestuser" />
+        <property name="password" value="bestuser" />
+    </bean>
+
+
+Далее мы описываем бин sessionFactory.
+sessionFactory нужен для того, чтобы получать из него сессии с помощью которых и осуществляется подключение к БД.
+В параметре прописываем dataSource - ссылку на предыдущий бин.
+Строчка - <property name="packagesToScan" value="spring_mvc_hibernate_aop.entity" /> говорит нам, что
+мы здесь указываем пакет для сканирования где будут находиться наши entity(для того чтобы связать таблицу с классом
+нам нужно создать entity).
+В следующих строчках
+<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+<prop key="hibernate.show_sql">true</prop>
+мы прописываем Диалект MySQL и в show_sql активируем эту опцию.
+
+<bean id="sessionFactory"
+          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="packagesToScan" value="spring_mvc_hibernate_aop.entity" />
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+            </props>
+        </property>
+    </bean>
+
+Далее мы описываем бин transactionManager.
+Ранее в уроках по Hibernate мы сначала после создания сессии и перед началом выполнения каких либо CRUD
+операций, сначала открывали транзакцию, а затем обязательно её закрывали. Но благодаря созданию такого бина
+transactionManager, spring позволяет нам больше этого не делать. Теперь мы можем больше не работать напрямую
+с транзакциями spring все сделает за нас. В этом бине transactionManager мы задаем ссылку на бин sessionFactory.
+
+<bean id="transactionManager"
+          class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+</bean>
+
+Для того, чтобы самим не открывать и не закрывать транзакции мы должны будем над методом использовать
+аннотацию @Transactional. И для этого мы её должны активировать с помощью следующей строки в applicationContext.xml:
+
+<tx:annotation-driven transaction-manager="transactionManager" />
+
+
+
