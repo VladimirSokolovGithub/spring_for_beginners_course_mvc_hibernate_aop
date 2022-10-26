@@ -1,0 +1,44 @@
+*** Les_7_Добавление в проект функционала AOP ***
+
+1. На этом уроке добавим функционала AOP в наш проект.
+Для начала мы должны сконфигурировать AOP.
+Для этого необходимо добавить dependency в pom.xml файл.
+<!-- https://mvnrepository.com/artifact/org.aspectj/aspectjweaver -->
+    <dependency>
+      <groupId>org.aspectj</groupId>
+      <artifactId>aspectjweaver</artifactId>
+      <version>1.9.6</version>
+    </dependency>
+
+Далее необходимо добавить конфигурацию в applicationContext.xml
+добавляем
+xmlns:aop="http://www.springframework.org/schema/aop"
+
+добавляем
+http://www.springframework.org/schema/aop
+http://www.springframework.org/schema/aop/spring-aop.xsd
+
+Далее необходимо здесь же добавить поддержку acpectj
+<aop:aspectj-autoproxy/> - это строка прописывается для того, чтобы Spring корректно
+отрабатывал наши классы с аннотацией @Aspect в которых мы создаем эдвайсы.
+
+Далее уже можно создать наш @Aspect класc. Для этого создадим пакет aspect и в нем
+класс MyLoggingAspect. В нем мы поработаем с эдвайсом Around. Будем делать логирование до
+и после работы всех методов которые непосредственно работают с базой данных, т.е
+для всех методов Репозитория - EmployeeDAOImpl.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
